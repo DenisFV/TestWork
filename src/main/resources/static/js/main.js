@@ -35,9 +35,6 @@ Vue.component('user-form', {
     },
     template:
     '<div>' +
-        // '<div class="form-group">' +
-        //
-        // '</div>'+
     '<label>Добавить нового пользователя :</label><br />' +
     '<input type="name" placeholder="Имя" v-model="name" /> ' +
     '<input type="surname" placeholder="Фамилия" v-model="surname" /> ' +
