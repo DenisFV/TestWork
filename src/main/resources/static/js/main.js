@@ -36,12 +36,12 @@ Vue.component('user-form', {
     template:
     '<div>' +
     '<label>Добавить нового пользователя :</label><br />' +
-    '<input type="name" placeholder="Имя" v-model="name" /> ' +
-    '<input type="surname" placeholder="Фамилия" v-model="surname" /> ' +
-    '<input type="patronymic" placeholder="Отчество" v-model="patronymic" />' +
+    '<input type="surname" placeholder="Иванов" v-model="surname" /> ' +
+    '<input type="name" placeholder="Иван" v-model="name" /> ' +
+    '<input type="patronymic" placeholder="Иванович" v-model="patronymic" />' +
     '<br />' +
-    '<input type="phone" placeholder="Телефон" v-model="phone" /> ' +
-    '<input type="email" placeholder="Почта" v-model="email" />' +
+    '<input type="phone" placeholder="89121234567, 8901234" v-model="phone" /> ' +
+    '<input type="email" placeholder="ivan@mail.com" v-model="email" />' +
     '<br />' +
     '<input type="button" value="Save" @click="save" />' +
     '</div>',
@@ -114,31 +114,45 @@ Vue.component('users-list', {
     template:
     '<div class="form-group col-md-6">' +
     '<user-form :users="users" :userAttr="user" /> <br />' +
-    '<label for="filt">Поиск по имени :  </label>' +
-    '<input type="filter" placeholder="Введите имя" v-model="filter" @input="search" id="filt" />' +
+    '<label for="filt">Поиск по любому парамметру :  </label>' +
+    '<input type="filter" placeholder="Введите фильтр" v-model="filter" @input="search" id="filt" />' +
     '<div v-if="!filter">' +
-        '<user-row v-for="user in users" :key="user.id" :user="user" :editMethod="editMethod" :users="users" />' +
+    '<user-row v-for="user in users" :key="user.id" :user="user" :editMethod="editMethod" :users="users" />' +
     '</div>' +
     '<div v-else>' +
-        '<user-row :user="filterUsers" :editMethod="editMethod" :users="filterUsers" />' +
+    '<user-row v-for="user in filterUsers" :key="user.id" :user="user" :editMethod="editMethod" :users="filterUsers" />' +
     '</div>' +
     '</div>',
     created: function() {
         userApi.get().then(result =>
-           result.json().then(data =>
-            data.forEach(user => this.users.push(user))
-           )
-        )
+        result.json().then(data =>
+        data.forEach(user => this.users.push(user))
+    )
+    )
     },
     methods: {
         search: function () {
-            this.filterUsers = null
+            var arr = []
             for(var i=0; i<this.users.length; i++) {
-                var usr = this.users[i]
-                if(usr.name===this.filter)
-                    this.filterUsers = usr
+                for (var key in this.users[i]) {
+                    var tel = this.users[i][key]
+                    if(key==="phone" && tel.indexOf(',')!==-1) {
+                        tel = tel.split(", ")
+                        for(var j =0; j<tel.length; j++){
+                            if (tel[j] === this.filter) {
+                                arr.push(this.users[i])
+                            }
+                        }
+                    } else {
+                        if (this.users[i][key] === this.filter) {
+                            arr.push(this.users[i])
+                        }
+                    }
+                }
             }
-            console.log(this.filterUsers)
+            this.filterUsers = arr.filter(function(item, pos) {
+                return arr.indexOf(item) === pos;
+            })
         },
         editMethod: function(user) {
             this.user = user;
